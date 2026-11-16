@@ -1,29 +1,32 @@
 // main.ts — "Idea Takes Flight" entrypoint for make.fun ai-excited-01.
-// Node 22, standard library only. Deterministic: copies the beside-the-
-// script entry.png into the output directory, byte for byte.
-import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
+// Node 22, standard library only. Copies the beside-the-script entry.png
+// into the output directory as entry.png. Deterministic: every run writes
+// byte-identical output.
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const sourceImage = join(scriptDir, "entry.png");
+
 function resolveOutputDir(): string {
-  const fromEnv = process.env.MAKEFUN_OUTPUT_DIR?.trim();
-  if (fromEnv) return fromEnv;
+  const fromEnv = process.env.MAKEFUN_OUTPUT_DIR;
+  if (fromEnv && fromEnv.trim().length > 0) {
+    return fromEnv;
+  }
   return "/output";
 }
 
 function main(): void {
-  const scriptDir = dirname(fileURLToPath(import.meta.url));
-  const source = join(scriptDir, "entry.png");
-  if (!existsSync(source)) {
-    console.error(`entry image not found: ${source}`);
+  if (!existsSync(sourceImage)) {
+    console.error(`error: entry image not found beside the script: ${sourceImage}`);
     process.exit(1);
   }
   const outputDir = resolveOutputDir();
   mkdirSync(outputDir, { recursive: true });
-  const target = join(outputDir, "entry.png");
-  copyFileSync(source, target);
-  const bytes = statSync(target).size;
-  console.log(`wrote ${target} (${bytes} bytes)`);
+  const destination = join(outputDir, "entry.png");
+  copyFileSync(sourceImage, destination);
+  console.log(`wrote ${destination}`);
 }
 
 main();
