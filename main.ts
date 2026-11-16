@@ -1,35 +1,31 @@
-// main.ts — "Idea Takes Flight" entry for the make.fun ai-excited-01 contest.
-// Node 22, standard library only. Copies the beside-the-script entry.png
-// into the output directory as entry.png. Deterministic: two runs write
-// identical bytes.
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+// main.ts — entrypoint for the make.fun bounty "Make the AI judge excited"
+// (ai-excited-01). Node 22, stdlib only.
+//
+// Resolves the output directory from MAKEFUN_OUTPUT_DIR (fallback /output),
+// creates it if missing, and copies the entry image that sits beside this
+// script into it as entry.png. The copy is byte-for-byte, so two runs
+// produce byte-identical output.
+import { copyFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Resolve the output directory from MAKEFUN_OUTPUT_DIR, falling back to
-// /output. A blank value falls back too, so an empty env var never resolves
-// to the current working directory.
+// Output directory comes from MAKEFUN_OUTPUT_DIR, falling back to /output.
+// An empty string counts as unset so a bare `MAKEFUN_OUTPUT_DIR=` still
+// lands in the default directory.
 function resolveOutputDir(): string {
-  const fromEnv = process.env.MAKEFUN_OUTPUT_DIR;
-  if (fromEnv && fromEnv.trim() !== "") {
+  const fromEnv: string | undefined = process.env.MAKEFUN_OUTPUT_DIR;
+  if (fromEnv !== undefined && fromEnv !== "") {
     return fromEnv;
   }
   return "/output";
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const source = join(here, "entry.png");
-const outputDir = resolveOutputDir();
+const outputDir: string = resolveOutputDir();
+const scriptDir: string = dirname(fileURLToPath(import.meta.url));
+const source: string = join(scriptDir, "entry.png");
+const destination: string = join(outputDir, "entry.png");
 
-function main(): void {
-  if (!existsSync(source)) {
-    console.error(`error: entry image not found beside this script: ${source}`);
-    process.exit(1);
-  }
+mkdirSync(outputDir, { recursive: true });
+copyFileSync(source, destination);
 
-  mkdirSync(outputDir, { recursive: true });
-  copyFileSync(source, join(outputDir, "entry.png"));
-  console.log(`wrote ${join(outputDir, "entry.png")}`);
-}
-
-main();
+console.log(`wrote ${destination}`);

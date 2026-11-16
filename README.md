@@ -19,7 +19,7 @@ MAKEFUN_OUTPUT_DIR=/output node main.ts
 ## Files
 
 - `main.ts` — the deterministic entrypoint
-- `entry.png` — the entry image, 1024x1024, 227,045 bytes (JPEG data)
+- `entry.png` — the entry image, 1024x1024, 227,073 bytes (JPEG data)
 - `LICENSE` — MIT
 
 ---
